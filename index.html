@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>安心血壓日記</title>
+  <style>
+    :root{
+      --ink:#17324d;--muted:#607387;--paper:#fffdf8;--line:#d8e1e8;
+      --blue:#176b87;--blue-dark:#0d5067;--blue-soft:#eaf6f8;
+      --green:#24714b;--green-soft:#eaf7ef;--amber:#985f0d;--amber-soft:#fff4dc;
+      --red:#a33636;--red-soft:#fff0ef;--shadow:0 12px 32px rgba(23,50,77,.10);
+    }
+    *{box-sizing:border-box}
+    html{font-size:18px;scroll-behavior:smooth}
+    body{margin:0;background:#f3f6f4;color:var(--ink);font-family:"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;line-height:1.6}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    .skip{position:absolute;left:-9999px;top:0}.skip:focus{left:1rem;z-index:99;background:#fff;padding:.7rem 1rem;border:3px solid var(--blue)}
+    header{background:linear-gradient(135deg,#0d5067,#176b87);color:white;padding:1.35rem 1rem 1.55rem}
+    .top{max-width:1100px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:.8rem}.logo{width:58px;height:58px;border-radius:18px;background:#fff;color:var(--blue);display:grid;place-items:center;font-size:1.85rem;box-shadow:0 6px 15px rgba(0,0,0,.15)}
+    h1{font-size:clamp(1.75rem,4vw,2.45rem);line-height:1.2;margin:0}.subtitle{margin:.25rem 0 0;color:#eaf9fb}
+    .today{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.45);padding:.55rem .9rem;border-radius:14px;font-weight:700}
+    main{max-width:1100px;margin:-.75rem auto 3rem;padding:0 1rem}
+    .notice{background:var(--amber-soft);border-left:7px solid #e19a24;border-radius:14px;padding:.8rem 1rem;margin-bottom:1rem;box-shadow:var(--shadow);font-weight:700}
+    .steps{display:flex;gap:.65rem;margin:1.2rem 0;overflow:auto;padding-bottom:.2rem}
+    .step{min-width:170px;flex:1;background:white;border:2px solid var(--line);border-radius:16px;padding:.7rem .8rem;display:flex;align-items:center;gap:.6rem;font-weight:800}
+    .step b{display:grid;place-items:center;flex:0 0 38px;height:38px;border-radius:50%;background:var(--blue-soft);color:var(--blue)}
+    .step.active{border-color:var(--blue);background:var(--blue-soft)}
+    .card{background:var(--paper);border:1px solid #e2e7e3;border-radius:22px;box-shadow:var(--shadow);padding:clamp(1rem,3vw,1.55rem);margin:1rem 0}
+    h2{font-size:1.55rem;margin:0 0 .2rem}h3{font-size:1.2rem;margin:1rem 0 .45rem}.hint{margin:.15rem 0 1rem;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.full{grid-column:1/-1}
+    label,.label{display:block;font-weight:800;margin-bottom:.32rem}
+    input[type="number"],input[type="datetime-local"],textarea{width:100%;min-height:58px;border:2px solid #9fb0bd;border-radius:13px;background:white;padding:.65rem .8rem;color:var(--ink)}
+    input:focus,textarea:focus,button:focus{outline:4px solid #f5c04b;outline-offset:2px}
+    .unit-wrap{position:relative}.unit-wrap input{padding-right:5.2rem}.unit{position:absolute;right:.75rem;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:700}
+    .choice-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem}
+    .choice input{position:absolute;opacity:0}.choice span{min-height:58px;border:2px solid #aab8c3;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:.5rem;font-weight:800}
+    .choice input:checked+span{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 0 0 3px #b9e5ee}
+    .checklist{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem}.check{display:flex;align-items:center;gap:.65rem;min-height:55px;border:2px solid var(--line);border-radius:13px;padding:.5rem .7rem;background:#fff;font-weight:700}.check input{width:25px;height:25px;accent-color:var(--blue)}
+    .actions{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.2rem}.btn{border:0;border-radius:14px;min-height:58px;padding:.7rem 1.25rem;font-weight:900}.primary{background:var(--blue);color:#fff;flex:2}.primary:hover{background:var(--blue-dark)}.secondary{background:#fff;border:2px solid var(--blue);color:var(--blue)}.danger{color:var(--red);border-color:#d8a0a0}
+    .feedback{display:none;margin-top:1rem;border-radius:15px;padding:.8rem 1rem;font-weight:800}.feedback.show{display:block}.feedback.ok{background:var(--green-soft);color:var(--green)}.feedback.warn{background:var(--red-soft);color:var(--red)}
+    .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin:1rem 0}.stat{border-radius:16px;background:var(--blue-soft);padding:.8rem;text-align:center}.stat strong{display:block;font-size:1.65rem;line-height:1.2}.stat span{color:var(--muted);font-size:.9rem}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px}table{border-collapse:collapse;width:100%;min-width:820px;background:#fff}th,td{padding:.7rem;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#eaf1f3}.empty{text-align:center;padding:2rem;color:var(--muted)}
+    .pill{display:inline-block;border-radius:999px;padding:.15rem .55rem;font-size:.85rem;font-weight:800}.pill.good{background:var(--green-soft);color:var(--green)}.pill.watch{background:var(--amber-soft);color:var(--amber)}.pill.alert{background:var(--red-soft);color:var(--red)}
+    .privacy{text-align:center;color:var(--muted);font-size:.9rem;margin-top:1.3rem}.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(max-width:720px){html{font-size:17px}.grid,.checklist{grid-template-columns:1fr}.choice-grid{grid-template-columns:repeat(2,1fr)}.summary{grid-template-columns:1fr}.full{grid-column:auto}.btn{width:100%}.today{width:100%;text-align:center}}
+    @media print{header,.notice,.steps,#entryCard,.actions,.privacy{display:none!important}body{background:#fff}main{margin:0;max-width:none}.card{box-shadow:none;border:0}.table-wrap{overflow:visible}table{min-width:0;font-size:12px}}
+  </style>
+</head>
+<body>
+  <a class="skip" href="#entryCard">直接前往量測紀錄</a>
+  <header>
+    <div class="top">
+      <div class="brand"><div class="logo" aria-hidden="true">♥</div><div><h1>安心血壓日記</h1><p class="subtitle">每天記一筆，安心多一點</p></div></div>
+      <div class="today" id="today" aria-live="polite"></div>
+    </div>
+  </header>
+  <main>
+    <div class="notice" role="note">量測前請安靜坐 5 分鐘，雙腳平放地面，手臂與心臟同高。</div>
+    <nav class="steps" aria-label="使用步驟"><div class="step active"><b>1</b>填寫血壓</div><div class="step"><b>2</b>自我評估</div><div class="step"><b>3</b>儲存紀錄</div></nav>
+
+    <form id="entryForm" class="card" novalidate>
+      <section id="entryCard" tabindex="-1">
+        <h2>今天的量測</h2><p class="hint">請依血壓計上的數字填寫。</p>
+        <div class="grid">
+          <div class="full"><label for="measuredAt">量測日期與時間</label><input id="measuredAt" type="datetime-local" required></div>
+          <div><label for="sys">收縮壓（高壓）</label><div class="unit-wrap"><input id="sys" type="number" inputmode="numeric" min="50" max="260" placeholder="例如 125" required><span class="unit">mmHg</span></div></div>
+          <div><label for="dia">舒張壓（低壓）</label><div class="unit-wrap"><input id="dia" type="number" inputmode="numeric" min="30" max="160" placeholder="例如 78" required><span class="unit">mmHg</span></div></div>
+          <div><label for="pulse">脈搏</label><div class="unit-wrap"><input id="pulse" type="number" inputmode="numeric" min="30" max="220" placeholder="例如 72" required><span class="unit">次／分</span></div></div>
+          <div><span class="label">量測手臂</span><div class="choice-grid" style="grid-template-columns:1fr 1fr"><label class="choice"><input type="radio" name="arm" value="左手" checked><span>左手</span></label><label class="choice"><input type="radio" name="arm" value="右手"><span>右手</span></label></div></div>
+        </div>
+      </section>
+
+      <section aria-labelledby="selfTitle">
+        <h3 id="selfTitle">自我評估表</h3><p class="hint">回想此刻的身體感受，沒有不舒服可不勾選。</p>
+        <span class="label">今天整體感覺如何？</span>
+        <div class="choice-grid">
+          <label class="choice"><input type="radio" name="feeling" value="很好"><span>😊 很好</span></label>
+          <label class="choice"><input type="radio" name="feeling" value="還好" checked><span>🙂 還好</span></label>
+          <label class="choice"><input type="radio" name="feeling" value="不太舒服"><span>😕 不太舒服</span></label>
+          <label class="choice"><input type="radio" name="feeling" value="很不舒服"><span>😣 很不舒服</span></label>
+        </div>
+        <h3>是否有以下情況？</h3>
+        <div class="checklist">
+          <label class="check"><input type="checkbox" name="symptom" value="頭暈">頭暈</label>
+          <label class="check"><input type="checkbox" name="symptom" value="頭痛">頭痛</label>
+          <label class="check"><input type="checkbox" name="symptom" value="胸悶或胸痛">胸悶或胸痛</label>
+          <label class="check"><input type="checkbox" name="symptom" value="呼吸不順">呼吸不順</label>
+          <label class="check"><input type="checkbox" name="symptom" value="心悸">心悸</label>
+          <label class="check"><input type="checkbox" name="symptom" value="視線模糊">視線模糊</label>
+          <label class="check"><input type="checkbox" name="symptom" value="手腳無力或麻木">手腳無力或麻木</label>
+          <label class="check"><input type="checkbox" name="symptom" value="忘記服藥">忘記服藥</label>
+        </div>
+        <div style="margin-top:1rem"><label for="note">備註（可不填）</label><textarea id="note" rows="2" placeholder="例如：剛散步回來、昨晚沒睡好"></textarea></div>
+        <div class="actions"><button class="btn primary" type="submit">儲存今天的紀錄</button><button class="btn secondary" type="reset">清除重填</button></div>
+        <div id="feedback" class="feedback" role="status" aria-live="assertive"></div>
+      </section>
+    </form>
+
+    <section class="card" aria-labelledby="historyTitle">
+      <h2 id="historyTitle">最近紀錄</h2><p class="hint">紀錄只儲存在這台裝置的瀏覽器中。</p>
+      <div class="summary"><div class="stat"><strong id="countStat">0</strong><span>筆紀錄</span></div><div class="stat"><strong id="avgSys">—</strong><span>平均高壓</span></div><div class="stat"><strong id="avgDia">—</strong><span>平均低壓</span></div></div>
+      <div class="table-wrap"><table><thead><tr><th>日期時間</th><th>血壓／脈搏</th><th>自我感覺</th><th>症狀與備註</th><th>管理</th></tr></thead><tbody id="rows"></tbody></table></div>
+      <div class="actions"><button id="exportBtn" class="btn secondary" type="button">匯出紀錄</button><button class="btn secondary" type="button" onclick="window.print()">列印給醫師</button><button id="clearAll" class="btn secondary danger" type="button">刪除全部</button></div>
+    </section>
+    <p class="privacy">🔒 本頁不是醫療診斷工具。如有胸痛、呼吸困難、意識改變、單側無力等嚴重不適，請立即尋求緊急醫療協助。</p>
+  </main>
+  <script>
+    const key='senior-bp-records-v1';
+    const form=document.querySelector('#entryForm'), rows=document.querySelector('#rows'), feedback=document.querySelector('#feedback');
+    const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    const records=()=>{try{return JSON.parse(localStorage.getItem(key))||[]}catch{return[]}};
+    const save=r=>localStorage.setItem(key,JSON.stringify(r));
+    function localDateValue(){const d=new Date(),o=d.getTimezoneOffset();return new Date(d-o*60000).toISOString().slice(0,16)}
+    function setNow(){document.querySelector('#measuredAt').value=localDateValue()}
+    function level(s,d){if(s>=180||d>=120)return['請立即再次量測並留意身體狀況','alert'];if(s>=140||d>=90)return['偏高，建議持續觀察','watch'];return['已記錄','good']}
+    function render(){const data=records();document.querySelector('#countStat').textContent=data.length;document.querySelector('#avgSys').textContent=data.length?Math.round(data.reduce((a,r)=>a+r.sys,0)/data.length):'—';document.querySelector('#avgDia').textContent=data.length?Math.round(data.reduce((a,r)=>a+r.dia,0)/data.length):'—';
+      rows.innerHTML=data.length?data.map((r,i)=>{const lv=level(r.sys,r.dia);return `<tr><td>${esc(new Date(r.at).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}))}<br>${esc(r.arm)}</td><td><strong>${r.sys} / ${r.dia}</strong> mmHg<br>脈搏 ${r.pulse}<br><span class="pill ${lv[1]}">${lv[0]}</span></td><td>${esc(r.feeling)}</td><td>${esc(r.symptoms.join('、')||'無')}<br>${esc(r.note)}</td><td><button class="btn secondary" style="min-height:45px;padding:.35rem .65rem" data-delete="${i}" type="button">刪除</button></td></tr>`}).join(''):`<tr><td colspan="5" class="empty">尚無紀錄，請先填寫上方表格。</td></tr>`}
+    form.addEventListener('submit',e=>{e.preventDefault();if(!form.reportValidity())return;const sys=+document.querySelector('#sys').value,dia=+document.querySelector('#dia').value,pulse=+document.querySelector('#pulse').value;if(sys<=dia){feedback.className='feedback show warn';feedback.textContent='請再確認：高壓通常應高於低壓。';return}const symptoms=[...document.querySelectorAll('[name=symptom]:checked')].map(x=>x.value);const item={at:document.querySelector('#measuredAt').value,sys,dia,pulse,arm:document.querySelector('[name=arm]:checked').value,feeling:document.querySelector('[name=feeling]:checked').value,symptoms,note:document.querySelector('#note').value.trim()};const data=records();data.unshift(item);save(data.slice(0,180));render();const urgent=symptoms.some(x=>['胸悶或胸痛','呼吸不順','手腳無力或麻木'].includes(x));feedback.className=`feedback show ${urgent?'warn':'ok'}`;feedback.textContent=urgent?'已儲存。你勾選了需要特別留意的症狀；若症狀明顯或持續，請儘快尋求醫療協助。':'已儲存完成！做得很好，請持續記錄。';form.reset();setNow();document.querySelector('[name=arm][value="左手"]').checked=true;document.querySelector('[name=feeling][value="還好"]').checked=true});
+    form.addEventListener('reset',()=>setTimeout(()=>{setNow();feedback.className='feedback'},0));
+    rows.addEventListener('click',e=>{const i=e.target.dataset.delete;if(i===undefined)return;if(confirm('確定要刪除這一筆紀錄嗎？')){const d=records();d.splice(+i,1);save(d);render()}});
+    document.querySelector('#clearAll').addEventListener('click',()=>{if(records().length&&confirm('確定要刪除全部紀錄嗎？刪除後無法復原。')){localStorage.removeItem(key);render()}});
+    document.querySelector('#exportBtn').addEventListener('click',()=>{const d=records();if(!d.length){alert('目前沒有可匯出的紀錄。');return}const head=['日期時間','收縮壓','舒張壓','脈搏','手臂','自我感覺','症狀','備註'];const csv='\ufeff'+[head,...d.map(r=>[r.at,r.sys,r.dia,r.pulse,r.arm,r.feeling,r.symptoms.join('、'),r.note])].map(a=>a.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='血壓紀錄.csv';a.click();URL.revokeObjectURL(a.href)});
+    document.querySelector('#today').textContent=new Intl.DateTimeFormat('zh-TW',{year:'numeric',month:'long',day:'numeric',weekday:'long'}).format(new Date());setNow();render();
+  </script>
+</body>
+</html>
